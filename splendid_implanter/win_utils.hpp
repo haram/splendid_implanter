@@ -63,15 +63,15 @@ namespace impl
 
 		for ( auto i = 0; i < loaded_module_sz / 8; i++ )
 		{
-			auto file_name = std::make_unique<wchar_t[ ]>( MAX_PATH );
+			wchar_t file_name[ MAX_PATH ] = L"";
 
 			// get the full working path for the current module
-			if ( !GetModuleFileNameEx( process_handle, loaded_modules.get( )[ i ], file_name.get( ), MAX_PATH ) )
+			if ( !GetModuleFileNameExW( process_handle, loaded_modules.get( )[ i ], file_name, _countof(file_name) ) )
 				continue;
 
 			// module name returned will be a full path, check only for file name sub string.
-			if ( std::wcsstr( file_name.get( ), module_name.data( ) ) )
-				return { loaded_modules.get( )[ i ], file_name.get( ) };
+			if ( std::wcsstr( file_name, module_name.data( ) ) )
+				return { loaded_modules.get( )[ i ], file_name };
 		}
 
 		return {};
@@ -84,8 +84,8 @@ namespace impl
 		std::vector<uint8_t> file_bytes{};
 		file_bytes.reserve( file_size );
 
-		auto bytes_read = 0;
-		if ( !ReadFile( file_handle, file_bytes.data( ), static_cast< DWORD >( file_size ), reinterpret_cast< PDWORD >( &bytes_read ), nullptr ) )
+		DWORD bytes_read = 0;
+		if ( !ReadFile( file_handle, file_bytes.data( ), static_cast< DWORD >( file_size ), &bytes_read, nullptr ) )
 		{
 			LOG_LAST_ERROR( );
 			return {};
