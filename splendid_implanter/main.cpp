@@ -100,12 +100,11 @@ int main( int argc, char** argv )
 
 	auto be_disk_buffer = impl::get_file_data( be_disk_handle.get( ), be_data.second );
 
-	// internally logged
-	//if ( be_disk_buffer.empty( ) )
-	//	return -1;
-
 	// look for an executable section to deploy hook in
-	const auto nt_header = reinterpret_cast< PIMAGE_NT_HEADERS >( be_disk_buffer.data( ) + reinterpret_cast< PIMAGE_DOS_HEADER >( be_disk_buffer.data( ) )->e_lfanew );
+	const auto buffer_start = be_disk_buffer.data( );
+
+	const auto dos_header = reinterpret_cast< PIMAGE_DOS_HEADER >( buffer_start );
+	const auto nt_header = reinterpret_cast< PIMAGE_NT_HEADERS >( buffer_start + dos_header->e_lfanew );
 	const auto section_header = reinterpret_cast< PIMAGE_SECTION_HEADER >( nt_header + 1 );
 
 	PIMAGE_SECTION_HEADER executable_section = nullptr;
