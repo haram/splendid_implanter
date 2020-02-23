@@ -61,7 +61,7 @@ int wmain( int argc, wchar_t** argv )
 		return -1;
 	}
 
-	printf( "[~] found BEService process [%lu]\n", be_process_id );
+	printf( "[~] found BEService process [%i]\n", be_process_id );
 
 	// open handle to beservice
 	impl::uq_handle be_process_handle{ OpenProcess( PROCESS_QUERY_INFORMATION | PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE, FALSE, be_process_id ), &CloseHandle };
@@ -201,8 +201,10 @@ int wmain( int argc, wchar_t** argv )
 		og_len += LDE( export_address + og_len, 64 );
 
 	const auto buf_len = og_len + sizeof( shell_code ) + sizeof( jmp_stub );
-	std::vector<uint8_t> buf_data;
-	buf_data.resize(buf_len);
+	
+	std::vector<uint8_t> buf_data{};
+	buf_data.resize( buf_len );
+
 	const auto og_data = export_address + og_len;
 
 	// :)

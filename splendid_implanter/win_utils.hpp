@@ -9,7 +9,7 @@
 #include <string_view>
 #include <mutex>
 
-#define LOG_LAST_ERROR() printf( "[!] failed at line %d, in file %s, last error: 0x%x\n", __LINE__, __FILE__, GetLastError( ) )
+#define LOG_LAST_ERROR() printf( "[!] failed at line %d, in file %s, last error: 0x%lx\n", __LINE__, __FILE__, GetLastError( ) )
 
 #define RET_CHK(x)\
 if (!x)\
@@ -82,7 +82,7 @@ namespace impl
 		const auto file_size = std::filesystem::file_size( file_path );
 
 		std::vector<uint8_t> file_bytes{};
-		file_bytes.reserve( file_size );
+		file_bytes.resize( file_size );
 
 		DWORD bytes_read = 0;
 		if ( !ReadFile( file_handle, file_bytes.data( ), static_cast< DWORD >( file_size ), &bytes_read, nullptr ) )
@@ -91,7 +91,7 @@ namespace impl
 			return {};
 		}
 
-		printf( "[~] read %lu bytes from BEService\n", bytes_read );
+		printf( "[~] read %i bytes from BEService\n", bytes_read );
 
 		return file_bytes;
 	}
