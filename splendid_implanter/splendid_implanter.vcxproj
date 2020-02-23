@@ -144,7 +144,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="etc_utils.hpp" />
     <ClInclude Include="win_utils.hpp" />
   </ItemGroup>
   <ItemGroup>

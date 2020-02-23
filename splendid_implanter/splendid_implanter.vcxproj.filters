@@ -12,9 +12,6 @@
     <ClInclude Include="win_utils.hpp">
       <Filter>header files</Filter>
     </ClInclude>
-    <ClInclude Include="etc_utils.hpp">
-      <Filter>header files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">

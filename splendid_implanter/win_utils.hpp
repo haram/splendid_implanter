@@ -7,13 +7,21 @@
 #include <memory>
 #include <stdint.h>
 #include <string_view>
+#include <mutex>
 
 #define LOG_LAST_ERROR() printf( "[!] failed at line %d, in file %s, last error: 0x%x\n", __LINE__, __FILE__, GetLastError( ) )
+
 #define RET_CHK(x)\
 if (!x)\
 {\
 LOG_LAST_ERROR();\
 return -1;\
+}\
+
+#define CALL_ONCE(x)\
+{\
+static std::once_flag flag;\
+std::call_once(flag, x);\
 }\
 
 namespace impl
@@ -77,7 +85,7 @@ namespace impl
 		file_bytes.reserve( file_size );
 
 		auto bytes_read = 0;
-		if ( !ReadFile( file_handle, file_bytes.data( ), file_size, reinterpret_cast< PDWORD >( &bytes_read ), nullptr ) )
+		if ( !ReadFile( file_handle, file_bytes.data( ), static_cast< DWORD >( file_size ), reinterpret_cast< PDWORD >( &bytes_read ), nullptr ) )
 		{
 			LOG_LAST_ERROR( );
 			return {};

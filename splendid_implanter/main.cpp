@@ -1,9 +1,7 @@
-#define _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
-#include "win_utils.hpp"
-#include "etc_utils.hpp"
-
 #include <chrono>
 #include <thread>
+
+#include "win_utils.hpp"
 
 #pragma comment(lib, "LDE64x64.lib")
 
@@ -178,7 +176,21 @@ int wmain( int argc, wchar_t** argv )
 		0xcc, 0xcc, 0xcc, 0xcc, 0x41, 0x5d, 0x41, 0x5c
 	};
 
-	const auto export_address = reinterpret_cast< uint8_t* >( GetProcAddress( GetModuleHandleW( L"Kernelbase.dll" ), "CreateFileW" ) );
+	const auto kernel_base = GetModuleHandleW( L"Kernelbase.dll" );
+
+	if ( !kernel_base )
+	{
+		LOG_LAST_ERROR( );
+		return -1;
+	}
+
+	const auto export_address = reinterpret_cast< uint8_t* >( GetProcAddress( kernel_base, "CreateFileW" ) );
+
+	if ( !export_address )
+	{
+		LOG_LAST_ERROR( );
+		return -1;
+	}
 
 	printf( "[~] preparing hook...\n" );
 
