@@ -9,15 +9,18 @@
 
 EXTERN_C int LDE( void*, int );
 
-int main( int argc, char** argv )
+int wmain( int argc, wchar_t** argv )
 {
-	if ( argc != 3 )
+	if ( argc < 3 )
 	{
-		printf( "[!] incorrect usage\n[!] format: splendid_implanter.exe [dll_name] [window_class]\n" );
+		printf( "[!] incorrect usage\n[!] format: splendid_implanter.exe dll_name window_class\n" );
 		return -1;
 	}
 
-	if ( !std::filesystem::exists( argv[ 1 ] ) )
+	const auto dll_name = argv[ 1 ];
+	const auto window_class = argv[ 2 ];
+
+	if ( !std::filesystem::exists( dll_name ) )
 	{
 		printf( "[!] dll path supplied is invalid\n" );
 		return -1;
@@ -102,40 +105,27 @@ int main( int argc, char** argv )
 
 	// look for an executable section to deploy hook in
 	const auto buffer_start = be_disk_buffer.data( );
+	const auto dos_header = reinterpret_cast<PIMAGE_DOS_HEADER>( buffer_start );
+	const auto nt_header = reinterpret_cast<PIMAGE_NT_HEADERS>( reinterpret_cast<uint8_t*>( dos_header ) + dos_header->e_lfanew );
+	const auto section_header = IMAGE_FIRST_SECTION( nt_header );
+	const auto section_header_end = section_header + nt_header->FileHeader.NumberOfSections;
 
-	const auto dos_header = reinterpret_cast< PIMAGE_DOS_HEADER >( buffer_start );
-	const auto nt_header = reinterpret_cast< PIMAGE_NT_HEADERS >( buffer_start + dos_header->e_lfanew );
-	const auto section_header = reinterpret_cast< PIMAGE_SECTION_HEADER >( nt_header + 1 );
-
-	PIMAGE_SECTION_HEADER executable_section = nullptr;
-
-	for ( auto i = 0; i < nt_header->FileHeader.NumberOfSections; i++ )
+	auto executable_section = std::find_if( section_header, section_header_end, []( const auto& section )
 	{
-		auto& curr_section = section_header[ i ];
+		return section.SizeOfRawData != 0 && ( section.Characteristics & IMAGE_SCN_MEM_EXECUTE ) == IMAGE_SCN_MEM_EXECUTE;
+	});
 
-		if ( curr_section.SizeOfRawData != 0 )
-			continue;
-
-		if ( !( curr_section.Characteristics & IMAGE_SCN_MEM_EXECUTE ) )
-			continue;
-
-		executable_section = &curr_section;
-		break;
-	}
-
-	if ( !executable_section )
+	if ( executable_section == section_header_end )
 	{
-		printf( "[!] can't find needed section...\n" );
+		printf("[!] can't find needed section...\n");
 		return -1;
 	}
 
 	printf( "[~] found section [%s]\n", reinterpret_cast< const char* >( executable_section->Name ) );
 
-	const auto short_dll_path = impl::to_utf16( argv[ 1 ] );
-
 	// since w10 1607, the limit for maximum path isn't actually MAX_PATH
 	auto dll_path = std::make_unique<wchar_t[ ]>( MAX_PATH );
-	GetFullPathNameW( short_dll_path.c_str( ), MAX_PATH, dll_path.get( ), nullptr );
+	GetFullPathNameW( dll_name, MAX_PATH, dll_path.get( ), nullptr );
 
 	printf( "[~] dll path: %ws\n", dll_path.get( ) );
 
@@ -199,16 +189,17 @@ int main( int argc, char** argv )
 		og_len += LDE( export_address + og_len, 64 );
 
 	const auto buf_len = og_len + sizeof( shell_code ) + sizeof( jmp_stub );
-	const auto buf_data = std::make_unique<uint8_t[ ]>( buf_len ).get( );
+	std::vector<uint8_t> buf_data;
+	buf_data.resize(buf_len);
 	const auto og_data = export_address + og_len;
 
 	// :)
-	memcpy( buf_data, shell_code, sizeof( shell_code ) );
-	memcpy( buf_data + 0x9, &paths_buffer, 8 );
-	memcpy( buf_data + 0x3b, &second_path_buffer, 8 );
-	memcpy( buf_data + sizeof( shell_code ), export_address, og_len );
-	memcpy( buf_data + sizeof( shell_code ) + og_len, jmp_stub, sizeof( jmp_stub ) );
-	memcpy( buf_data + sizeof( shell_code ) + og_len + 3, &og_data, 8 );
+	memcpy( buf_data.data( ), shell_code, sizeof( shell_code ) );
+	memcpy( buf_data.data( ) + 0x9, &paths_buffer, 8 );
+	memcpy( buf_data.data( ) + 0x3b, &second_path_buffer, 8 );
+	memcpy( buf_data.data( ) + sizeof( shell_code ), export_address, og_len );
+	memcpy( buf_data.data( ) + sizeof( shell_code ) + og_len, jmp_stub, sizeof( jmp_stub ) );
+	memcpy( buf_data.data( ) + sizeof( shell_code ) + og_len + 3, &og_data, 8 );
 
 	const auto deployment_location = ( reinterpret_cast< uint8_t* >( be_data.first ) + executable_section->VirtualAddress + executable_section->Misc.VirtualSize ) - buf_len;
 
@@ -217,7 +208,7 @@ int main( int argc, char** argv )
 	auto cache = 0;
 
 	RET_CHK( VirtualProtectEx( be_process_handle.get( ), deployment_location, buf_len, PAGE_EXECUTE_READWRITE, reinterpret_cast< PDWORD >( &cache ) ) )
-	RET_CHK( WriteProcessMemory( be_process_handle.get( ), deployment_location, buf_data, buf_len, nullptr ) )
+	RET_CHK( WriteProcessMemory( be_process_handle.get( ), deployment_location, buf_data.data( ), buf_len, nullptr ) )
 	RET_CHK( VirtualProtectEx( be_process_handle.get( ), deployment_location, buf_len, cache, reinterpret_cast< PDWORD >( &cache ) ) )
 
 	*reinterpret_cast< uint64_t* >( &jmp_stub[ 3 ] ) = reinterpret_cast< uint64_t >( deployment_location );
@@ -242,7 +233,7 @@ int main( int argc, char** argv )
 		if ( current_time_mins >= 2u )
 			break;
 
-		game_window = FindWindowA( argv[ 2 ], nullptr );
+		game_window = FindWindowW( window_class, nullptr );
 		th::sleep_for( ch::milliseconds( 250 ) );
 	}
 
@@ -260,7 +251,7 @@ int main( int argc, char** argv )
 		return -1;
 	}
 
-	const auto loaded_module = LoadLibraryW( short_dll_path.c_str( ) );
+	const auto loaded_module = LoadLibraryW( dll_path.get() );
 
 	if ( !loaded_module )
 	{
