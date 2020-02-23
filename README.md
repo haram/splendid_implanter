@@ -12,6 +12,8 @@ The name is a play on Perfect Injector, don't mind that :).
 
 ## Example
 
+Every injectable .dll must have an export called "wnd_hk" that handles the WH, then calls the next in queue.
+
 ```cpp
 extern "C" __declspec( dllexport )
 LRESULT wnd_hk( int code, WPARAM wparam, LPARAM lparam )
@@ -24,6 +26,9 @@ LRESULT wnd_hk( int code, WPARAM wparam, LPARAM lparam )
 	if ( !done_once && pmsg->message == 0x5b0 )
 	{
 		UnhookWindowsHookEx( reinterpret_cast< HHOOK >( lparam ) );
+		
+		// initialization here
+		
 		done_once = true;
 	}
 
