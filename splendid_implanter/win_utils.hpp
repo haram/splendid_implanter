@@ -65,7 +65,7 @@ namespace impl
 				continue;
 
 			// module name returned will be a full path, check only for file name sub string.
-			if ( std::wcsstr( file_name, module_name.data( ) ) )
+			if ( std::wcsstr( file_name, module_name.data( ) ) != nullptr )
 				return { loaded_modules.get( )[ i ], file_name };
 		}
 
@@ -102,14 +102,23 @@ namespace impl
 		}
 
 		LUID luid{};
-		LookupPrivilegeValueW( nullptr, privilege_name.data( ), &luid );
+		if ( !LookupPrivilegeValueW( nullptr, privilege_name.data( ), &luid ) )
+		{
+			LOG_LAST_ERROR( );
+			return false;
+		}
 
 		TOKEN_PRIVILEGES token_state{};
 		token_state.PrivilegeCount = 1;
 		token_state.Privileges[ 0 ].Luid = luid;
 		token_state.Privileges[ 0 ].Attributes = SE_PRIVILEGE_ENABLED;
 
-		AdjustTokenPrivileges( token_handle, FALSE, &token_state, sizeof( TOKEN_PRIVILEGES ), nullptr, nullptr );
+		if ( !AdjustTokenPrivileges( token_handle, FALSE, &token_state, sizeof( TOKEN_PRIVILEGES ), nullptr, nullptr ) )
+		{
+			LOG_LAST_ERROR( );
+			return false;
+		}
+
 		CloseHandle( token_handle );
 
 		return true;

@@ -1,9 +1,11 @@
 #include <chrono>
 #include <thread>
 
+#include <ntw/sys/processes.hpp>
 #include "win_utils.hpp"
 
 #pragma comment(lib, "LDE64x64.lib")
+#pragma comment(lib, "ntdll.lib")
 
 EXTERN_C int LDE( void*, int );
 
@@ -30,32 +32,36 @@ int wmain( int argc, wchar_t** argv )
 	if ( !impl::enable_privilege( L"SeDebugPrivilege" ) )
 		return -1;
 
+	std::array<uint8_t, 0x100000> processes_array{};
+	auto processes = ntw::sys::acquire_processes( processes_array );
+
 	printf( "[~] enabled debug privilege!\n" );
 
-	namespace th = std::this_thread;
-	namespace ch = std::chrono;
+	printf( "[~] waiting for battleye service...\n" );
 
 	auto be_process_id = 0;
 
 	while ( !be_process_id )
 	{
-		static auto done_once = false;
-
-		if ( !done_once )
-		{
-			printf( "[~] waiting for battleye service...\n" );
-			done_once = true;
-		}
-
 		// check if it's been 2 minutes since start, if it's been 2 minutes & process hasn't been found, break
-		static const auto cached_time = ch::system_clock::now( );
-		const auto current_time_mins = ch::duration_cast< ch::minutes >( ch::system_clock::now( ) - cached_time ).count( );
+		static const auto cached_time = std::chrono::system_clock::now( );
+		const auto current_time_mins = std::chrono::duration_cast< std::chrono::minutes >( std::chrono::system_clock::now( ) - cached_time ).count( );
 
 		if ( current_time_mins >= 2u )
 			break;
 
-		be_process_id = impl::get_process_id( L"BEService.exe" );
-		th::sleep_for( ch::milliseconds( 250 ) );
+		processes = ntw::sys::acquire_processes( processes_array );
+		
+		for ( auto& process : *processes )
+		{
+			if ( std::wcsstr( process.image_name.view( ).data( ), L"BEService.exe" ) != nullptr )
+			{
+				be_process_id = process.id;
+				break;
+			}
+		}
+
+		std::this_thread::sleep_for( std::chrono::milliseconds( 250 ) );
 	}
 
 	if ( !be_process_id )
@@ -238,27 +244,21 @@ int wmain( int argc, wchar_t** argv )
 
 	printf( "[~] hook deployed!\n" );
 
+	printf( "[~] waiting for game to open...\n" );
+
 	HWND game_window = nullptr;
 
 	while ( !game_window )
 	{
-		static auto done_once = false;
-
-		if ( !done_once )
-		{
-			printf( "[~] aiting for game to open...\n" );
-			done_once = true;
-		}
-
 		// check if it's been 2 minutes since start, if it's been 2 minutes & window hasn't been found, break
-		static const auto cached_time = ch::system_clock::now( );
-		const auto current_time_mins = ch::duration_cast< ch::minutes >( ch::system_clock::now( ) - cached_time ).count( );
+		static const auto cached_time = std::chrono::system_clock::now( );
+		const auto current_time_mins = std::chrono::duration_cast< std::chrono::minutes >( std::chrono::system_clock::now( ) - cached_time ).count( );
 
 		if ( current_time_mins >= 2u )
 			break;
 
 		game_window = FindWindowW( window_class, nullptr );
-		th::sleep_for( ch::milliseconds( 250 ) );
+		std::this_thread::sleep_for( std::chrono::milliseconds( 250 ) );
 	}
 
 	if ( !game_window )
