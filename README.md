@@ -8,7 +8,7 @@ This exploits a flaw in the user-mode component of BattlEye that should've never
 
 By hooking CreateFileW, and checking if the lpFileName parameter contains our .dll's name then manipulating it to believe that Kernel32.dll is being loaded, we pass their dll checks and land our module inside of it as if it's a legitimate module.
 
-The name is a play on Perfect Injector, don't mind that :).
+The name is a play on Perfect Injector, don't mind that.
 
 ## Example
 
@@ -37,7 +37,7 @@ LRESULT wnd_hk( int code, WPARAM wparam, LPARAM lparam )
 }
 ```
 
-splendid_implant is a ready-to-inject example that'll pop up with a message box on injection.
+splendid_implant is a ready-to-inject example for R6:S that'll enable player icons once in-game.
 
 ## Features
 
