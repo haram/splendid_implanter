@@ -20,7 +20,7 @@ int wmain( int argc, wchar_t** argv )
 
 	if ( !std::filesystem::exists( dll_name ) )
 	{
-		printf( "[!] dll path supplied is invalid\n" );
+		printf( "[!] dll path supplied does not exist\n" );
 		return -1;
 	}
 
