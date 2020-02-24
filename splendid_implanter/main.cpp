@@ -1,11 +1,9 @@
 #include <chrono>
 #include <thread>
 
-#include <ntw/sys/processes.hpp>
 #include "win_utils.hpp"
 
 #pragma comment(lib, "LDE64x64.lib")
-#pragma comment(lib, "ntdll.lib")
 
 EXTERN_C int LDE( void*, int );
 
@@ -32,9 +30,6 @@ int wmain( int argc, wchar_t** argv )
 	if ( !impl::enable_privilege( L"SeDebugPrivilege" ) )
 		return -1;
 
-	std::array<uint8_t, 0x100000> processes_array{};
-	auto processes = ntw::sys::acquire_processes( processes_array );
-
 	printf( "[~] enabled debug privilege!\n" );
 
 	printf( "[~] waiting for battleye service...\n" );
@@ -50,17 +45,7 @@ int wmain( int argc, wchar_t** argv )
 		if ( current_time_mins >= 2u )
 			break;
 
-		processes = ntw::sys::acquire_processes( processes_array );
-		
-		for ( auto& process : *processes )
-		{
-			if ( std::wcsstr( process.image_name.view( ).data( ), L"BEService.exe" ) != nullptr )
-			{
-				be_process_id = process.id;
-				break;
-			}
-		}
-
+		be_process_id = impl::get_process_id( L"BEService.exe" );
 		std::this_thread::sleep_for( std::chrono::milliseconds( 250 ) );
 	}
 
