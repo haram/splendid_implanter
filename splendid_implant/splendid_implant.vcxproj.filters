@@ -5,10 +5,21 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
+    <Filter Include="header files">
+      <UniqueIdentifier>{32cedcd4-0432-4ece-9bed-bbc0278303f0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
       <Filter>source files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="mem_utils.hpp">
+      <Filter>header files</Filter>
+    </ClInclude>
+    <ClInclude Include="game_structs.hpp">
+      <Filter>header files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

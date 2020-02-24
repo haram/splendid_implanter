@@ -66,7 +66,7 @@ namespace impl
 			wchar_t file_name[ MAX_PATH ] = L"";
 
 			// get the full working path for the current module
-			if ( !GetModuleFileNameExW( process_handle, loaded_modules.get( )[ i ], file_name, _countof(file_name) ) )
+			if ( !GetModuleFileNameExW( process_handle, loaded_modules.get( )[ i ], file_name, _countof( file_name ) ) )
 				continue;
 
 			// module name returned will be a full path, check only for file name sub string.
@@ -91,7 +91,7 @@ namespace impl
 			return {};
 		}
 
-		printf( "[~] read %i bytes from BEService\n", bytes_read );
+		printf( "[~] read %ikb from BEService [0x%p]\n", bytes_read / 1024, file_bytes.data( ) );
 
 		return file_bytes;
 	}

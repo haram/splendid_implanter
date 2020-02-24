@@ -32,7 +32,7 @@ int wmain( int argc, wchar_t** argv )
 
 	printf( "[~] enabled debug privilege!\n" );
 
-	namespace th = std::this_thread; 
+	namespace th = std::this_thread;
 	namespace ch = std::chrono;
 
 	auto be_process_id = 0;
@@ -103,23 +103,28 @@ int wmain( int argc, wchar_t** argv )
 
 	// look for an executable section to deploy hook in
 	const auto buffer_start = be_disk_buffer.data( );
-	const auto dos_header = reinterpret_cast<PIMAGE_DOS_HEADER>( buffer_start );
-	const auto nt_header = reinterpret_cast<PIMAGE_NT_HEADERS>( reinterpret_cast<uint8_t*>( dos_header ) + dos_header->e_lfanew );
+
+	// get the NT header
+	const auto dos_header = reinterpret_cast< PIMAGE_DOS_HEADER >( buffer_start );
+	const auto nt_header = reinterpret_cast< PIMAGE_NT_HEADERS >( reinterpret_cast< uint8_t* >( dos_header ) + dos_header->e_lfanew );
+
+	// search for an executable section
 	const auto section_header = IMAGE_FIRST_SECTION( nt_header );
 	const auto section_header_end = section_header + nt_header->FileHeader.NumberOfSections;
 
-	auto executable_section = std::find_if( section_header, section_header_end, []( const auto& section )
-	{
-		return section.SizeOfRawData != 0 && ( section.Characteristics & IMAGE_SCN_MEM_EXECUTE ) == IMAGE_SCN_MEM_EXECUTE;
-	});
+	// get section that has IMAGE_SCN_MEM_EXECUTE flag, and no raw data.
+	auto executable_section = std::find_if( section_header, section_header_end, [ ]( const auto& section )
+											{
+												return section.SizeOfRawData != 0 && ( section.Characteristics & IMAGE_SCN_MEM_EXECUTE ) == IMAGE_SCN_MEM_EXECUTE;
+											} );
 
 	if ( executable_section == section_header_end )
 	{
-		printf("[!] can't find needed section...\n");
+		printf( "[!] can't find needed section...\n" );
 		return -1;
 	}
 
-	printf( "[~] found section [%s]\n", reinterpret_cast< const char* >( executable_section->Name ) );
+	printf( "[~] found section [%s]\n", reinterpret_cast< const char* >( executable_section->Name + 1 ) );
 
 	// since w10 1607, the limit for maximum path isn't actually MAX_PATH
 	auto dll_path = std::make_unique<wchar_t[ ]>( MAX_PATH );
@@ -201,7 +206,7 @@ int wmain( int argc, wchar_t** argv )
 		og_len += LDE( export_address + og_len, 64 );
 
 	const auto buf_len = og_len + sizeof( shell_code ) + sizeof( jmp_stub );
-	
+
 	std::vector<uint8_t> buf_data{};
 	buf_data.resize( buf_len );
 
@@ -265,13 +270,17 @@ int wmain( int argc, wchar_t** argv )
 		return -1;
 	}
 
-	const auto loaded_module = LoadLibraryW( dll_path.get() );
+	printf( "[~] window thread found [0x%lx]\n", window_thread );
+
+	const auto loaded_module = LoadLibraryW( dll_path.get( ) );
 
 	if ( !loaded_module )
 	{
 		LOG_LAST_ERROR( );
 		return -1;
 	}
+
+	printf( "[~] loaded module to local process [0x%p]\n", loaded_module );
 
 	const auto window_hook = GetProcAddress( loaded_module, "wnd_hk" );
 
@@ -280,6 +289,8 @@ int wmain( int argc, wchar_t** argv )
 		printf( "[!] can't find needed export in implanted dll\n" );
 		return -1;
 	}
+
+	printf( "[~] posting message...\n" );
 
 	// handle failure etc...
 	for ( auto i = 0; i < 50; i++ )
