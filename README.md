@@ -11,7 +11,7 @@ BattlEye compatible injector, done completely from user-mode.
 
 In this case: `splendid_implanter.exe splendid_implant.dll R6Game`
 
-To find the window's class name, use winlister.
+To find the window's class name, use [WinLister](https://www.nirsoft.net/utils/winlister.html).
 
 ## Details
 
