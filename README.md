@@ -16,7 +16,7 @@ Every injectable .dll must have an export called "wnd_hk" that handles the WH, t
 
 ```cpp
 extern "C" __declspec( dllexport )
-LRESULT wnd_hk( int code, WPARAM wparam, LPARAM lparam )
+LRESULT wnd_hk( int32_t code, WPARAM wparam, LPARAM lparam )
 {
 	// handle race condition from calling hook multiple times
 	static auto done_once = false;
@@ -43,6 +43,7 @@ splendid_implant is a ready-to-inject example for R6:S that'll enable player ico
 
 support for:
 
+- thread creation
 - seh, c++ exceptions
 - raw detouring without any tricks
 - doing literally anything you want
