@@ -2,7 +2,7 @@
 #include <stdint.h>
 
 #define BOT_NORMAL 0x7ff7
-#define BOT_BOMBER 0x7ff6
+#define BOT_NORMAL2 0x7ff6
 
 #define PREP_PHASE 2
 #define ACTION_PHASE 3

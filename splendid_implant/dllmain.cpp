@@ -49,6 +49,11 @@ unsigned long main_thread( void* )
 
 	while ( true )
 	{
+		static auto esp_enabled = true;
+
+		if ( GetAsyncKeyState( VK_INSERT ) & 1 )
+			esp_enabled = !esp_enabled;
+
 		if ( !is_in_game( state_manager ) )
 			continue;
 
@@ -67,7 +72,7 @@ unsigned long main_thread( void* )
 			// check if player's a bot, bots are always in .data
 			const auto higher_bits = static_cast< uint32_t >( reinterpret_cast< uint64_t >( entity ) >> 32 );
 
-			if ( higher_bits == BOT_NORMAL || higher_bits == BOT_BOMBER )
+			if ( higher_bits == BOT_NORMAL || higher_bits == BOT_NORMAL2 )
 				continue;
 
 			const auto event_listener = entity->event_listener;
@@ -87,7 +92,7 @@ unsigned long main_thread( void* )
 				if ( !component || *reinterpret_cast< uint8_t** >( component ) != player_marker_component )
 					continue;
 
-				*reinterpret_cast< bool* >( component + 0x534 ) = true;
+				*reinterpret_cast< bool* >( component + 0x534 ) = esp_enabled;
 			}
 		}
 
