@@ -87,12 +87,14 @@ unsigned long main_thread( void* )
 				if ( !component || *reinterpret_cast< uint8_t** >( component ) != player_marker_component )
 					continue;
 
-				*reinterpret_cast< bool* >( component + 0x532 ) = true;
+				*reinterpret_cast< bool* >( component + 0x534 ) = true;
 			}
 		}
 
 		std::this_thread::sleep_for( std::chrono::milliseconds( 20 ) );
 	}
+
+	return 0;
 }
 
 bool DllMain( HMODULE module_instance, DWORD call_reason, void* )
