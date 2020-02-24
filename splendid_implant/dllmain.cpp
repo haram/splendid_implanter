@@ -64,7 +64,7 @@ unsigned long main_thread( void* )
 			if ( !entity )
 				continue;
 
-			// check if player's a bot
+			// check if player's a bot, bots are always in .data
 			const auto higher_bits = static_cast< uint32_t >( reinterpret_cast< uint64_t >( entity ) >> 32 );
 
 			if ( higher_bits == 0x7ff7 || higher_bits == 0x7ff6 )
@@ -91,7 +91,7 @@ unsigned long main_thread( void* )
 			}
 		}
 
-		std::this_thread::sleep_for( std::chrono::milliseconds( 20 ) );
+		std::this_thread::sleep_for( std::chrono::milliseconds( 500 ) );
 	}
 
 	return 0;

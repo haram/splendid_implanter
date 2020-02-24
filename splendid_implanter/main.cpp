@@ -52,7 +52,7 @@ int wmain( int argc, wchar_t** argv )
 			break;
 
 		be_process_id = impl::get_process_id( L"BEService.exe" );
-		th::sleep_for( ch::milliseconds( 20 ) );
+		th::sleep_for( ch::milliseconds( 250 ) );
 	}
 
 	if ( !be_process_id )
