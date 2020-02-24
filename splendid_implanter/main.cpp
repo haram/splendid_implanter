@@ -11,7 +11,9 @@ int wmain( int argc, wchar_t** argv )
 {
 	if ( argc < 3 )
 	{
-		printf( "[!] incorrect usage\n[!] format: splendid_implanter.exe dll_name window_class\n" );
+		const auto full_path = std::filesystem::path( argv[ 0 ] );
+
+		printf( "[!] incorrect usage\n[!] format: %ws dll_name window_class", full_path.filename( ).c_str( ) );
 		return -1;
 	}
 
@@ -20,7 +22,7 @@ int wmain( int argc, wchar_t** argv )
 
 	if ( !std::filesystem::exists( dll_name ) )
 	{
-		printf( "[!] dll path supplied does not exist\n" );
+		printf( "[!] dll path supplied does not exist" );
 		return -1;
 	}
 
@@ -51,7 +53,7 @@ int wmain( int argc, wchar_t** argv )
 
 	if ( !be_process_id )
 	{
-		printf( "[!] timed out\n" );
+		printf( "[!] timed out" );
 		return -1;
 	}
 
@@ -75,7 +77,7 @@ int wmain( int argc, wchar_t** argv )
 	// shouldn't be possible
 	if ( !be_data.first )
 	{
-		printf( "[!] failed to find BEService.exe data\n" );
+		printf( "[!] failed to find BEService.exe data" );
 		return -1;
 	}
 
@@ -113,13 +115,13 @@ int wmain( int argc, wchar_t** argv )
 
 	if ( executable_section == section_header_end )
 	{
-		printf( "[!] can't find needed section...\n" );
+		printf( "[!] can't find needed section" );
 		return -1;
 	}
 
 	printf( "[~] found section [%s]\n", reinterpret_cast< const char* >( executable_section->Name + 1 ) );
 
-	// since w10 1607, the limit for maximum path isn't actually MAX_PATH
+	// since w10 1607, the limit for maximum path isn't actually MAX_PATH, just assume it is.
 	auto dll_path = std::make_unique<wchar_t[ ]>( MAX_PATH );
 	GetFullPathNameW( dll_name, MAX_PATH, dll_path.get( ), nullptr );
 
@@ -190,6 +192,8 @@ int wmain( int argc, wchar_t** argv )
 		return -1;
 	}
 
+	printf( "[~] found CreateFileW [0x%p]\n", export_address );
+
 	printf( "[~] preparing hook...\n" );
 
 	// calculate buffer length based on bytes needed from original
@@ -217,11 +221,11 @@ int wmain( int argc, wchar_t** argv )
 
 	printf( "[~] deploying hook...\n" );
 
-	auto cache = 0;
+	DWORD cache = 0;
 
-	RET_CHK( VirtualProtectEx( be_process_handle.get( ), deployment_location, buf_len, PAGE_EXECUTE_READWRITE, reinterpret_cast< PDWORD >( &cache ) ) )
+	RET_CHK( VirtualProtectEx( be_process_handle.get( ), deployment_location, buf_len, PAGE_EXECUTE_READWRITE, &cache ) )
 	RET_CHK( WriteProcessMemory( be_process_handle.get( ), deployment_location, buf_data.data( ), buf_len, nullptr ) )
-	RET_CHK( VirtualProtectEx( be_process_handle.get( ), deployment_location, buf_len, cache, reinterpret_cast< PDWORD >( &cache ) ) )
+	RET_CHK( VirtualProtectEx( be_process_handle.get( ), deployment_location, buf_len, cache, &cache ) )
 
 	*reinterpret_cast< uint64_t* >( &jmp_stub[ 3 ] ) = reinterpret_cast< uint64_t >( deployment_location );
 
@@ -276,13 +280,13 @@ int wmain( int argc, wchar_t** argv )
 
 	if ( !window_hook )
 	{
-		printf( "[!] can't find needed export in implanted dll\n" );
+		printf( "[!] can't find needed export in implanted dll, last error: 0x%lx", GetLastError( ) );
 		return -1;
 	}
 
 	printf( "[~] posting message...\n" );
 
-	// handle failure etc...
+	// spam the fuck out of the message handler
 	for ( auto i = 0; i < 50; i++ )
 		PostThreadMessageW( window_thread, 0x5b0, 0, reinterpret_cast< LPARAM >( shell_code ) );
 

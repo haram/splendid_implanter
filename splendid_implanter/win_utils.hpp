@@ -10,7 +10,7 @@
 
 #define FIND_NT_HEADER(x) reinterpret_cast<PIMAGE_NT_HEADERS>( uint64_t(x) + reinterpret_cast<PIMAGE_DOS_HEADER>(x)->e_lfanew )
 
-#define LOG_LAST_ERROR() printf( "[!] failed at line %d, in file %s, last error: 0x%lx\n", __LINE__, __FILE__, GetLastError( ) )
+#define LOG_LAST_ERROR() printf( "[!] failed at line %d, in file %s, last error: 0x%lx", __LINE__, __FILE__, GetLastError( ) )
 
 #define RET_CHK(x)\
 if (!x)\
@@ -56,7 +56,7 @@ namespace impl
 			return {};
 		}
 
-		for ( auto i = 0; i < loaded_module_sz / 8; i++ )
+		for ( auto i = 0u; i < loaded_module_sz / 8u; i++ )
 		{
 			wchar_t file_name[ MAX_PATH ] = L"";
 
@@ -86,7 +86,7 @@ namespace impl
 			return {};
 		}
 
-		printf( "[~] read %ikb from BEService [0x%p]\n", bytes_read / 1024, file_bytes.data( ) );
+		printf( "[~] read %dkb from BEService [0x%p]\n", bytes_read / 1024, file_bytes.data( ) );
 
 		return file_bytes;
 	}
@@ -94,7 +94,6 @@ namespace impl
 	__forceinline bool enable_privilege( const std::wstring_view privilege_name )
 	{
 		HANDLE token_handle = nullptr;
-
 		if ( !OpenProcessToken( GetCurrentProcess( ), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &token_handle ) )
 		{
 			LOG_LAST_ERROR( );
