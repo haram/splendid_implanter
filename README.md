@@ -4,7 +4,7 @@ BattlEye .dll injector, done completely from user-mode.
 
 ## Usage
 
-Compile the solution on Release x64, then cd to the directory with an elevated commandline, and use like: splendid_implanter.exe dll_name window_class
+Compile the solution on Release x64, then cd to the directory with an elevated command line, and use like: splendid_implanter.exe dll_name window_class
 
 To find the window's class name, use winlister.
 
