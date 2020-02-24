@@ -9,7 +9,7 @@ bool is_in_game( game_state_t* state_manager )
 	const auto game_state = state_manager->game_state;
 
 	// == prep phase, == action phase
-	return game_state == 2 || game_state == 3;
+	return game_state == PREP_PHASE || game_state == ACTION_PHASE;
 }
 
 unsigned long main_thread( void* )
@@ -67,7 +67,7 @@ unsigned long main_thread( void* )
 			// check if player's a bot, bots are always in .data
 			const auto higher_bits = static_cast< uint32_t >( reinterpret_cast< uint64_t >( entity ) >> 32 );
 
-			if ( higher_bits == 0x7ff7 || higher_bits == 0x7ff6 )
+			if ( higher_bits == BOT_NORMAL || higher_bits == BOT_BOMBER )
 				continue;
 
 			const auto event_listener = entity->event_listener;

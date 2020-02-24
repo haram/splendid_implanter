@@ -39,10 +39,13 @@ int wmain( int argc, wchar_t** argv )
 
 	while ( !be_process_id )
 	{
-		CALL_ONCE( [ ]( )
-				   {
-					   printf( "[~] waiting for battleye service...\n" );
-				   } );
+		static auto done_once = false;
+
+		if ( !done_once )
+		{
+			printf( "[~] waiting for battleye service...\n" );
+			done_once = true;
+		}
 
 		// check if it's been 2 minutes since start, if it's been 2 minutes & process hasn't been found, break
 		static const auto cached_time = ch::system_clock::now( );
@@ -105,8 +108,7 @@ int wmain( int argc, wchar_t** argv )
 	const auto buffer_start = be_disk_buffer.data( );
 
 	// get the NT header
-	const auto dos_header = reinterpret_cast< PIMAGE_DOS_HEADER >( buffer_start );
-	const auto nt_header = reinterpret_cast< PIMAGE_NT_HEADERS >( reinterpret_cast< uint8_t* >( dos_header ) + dos_header->e_lfanew );
+	const auto nt_header = FIND_NT_HEADER( buffer_start );
 
 	// search for an executable section
 	const auto section_header = IMAGE_FIRST_SECTION( nt_header );
@@ -240,10 +242,13 @@ int wmain( int argc, wchar_t** argv )
 
 	while ( !game_window )
 	{
-		CALL_ONCE( [ ]( )
-				   {
-					   printf( "[~] waiting for game to open...\n" );
-				   } );
+		static auto done_once = false;
+
+		if ( !done_once )
+		{
+			printf( "[~] aiting for game to open...\n" );
+			done_once = true;
+		}
 
 		// check if it's been 2 minutes since start, if it's been 2 minutes & window hasn't been found, break
 		static const auto cached_time = ch::system_clock::now( );

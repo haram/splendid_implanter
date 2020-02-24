@@ -7,7 +7,8 @@
 #include <memory>
 #include <stdint.h>
 #include <string_view>
-#include <mutex>
+
+#define FIND_NT_HEADER(x) reinterpret_cast<PIMAGE_NT_HEADERS>( uint64_t(x) + reinterpret_cast<PIMAGE_DOS_HEADER>(x)->e_lfanew )
 
 #define LOG_LAST_ERROR() printf( "[!] failed at line %d, in file %s, last error: 0x%lx\n", __LINE__, __FILE__, GetLastError( ) )
 
@@ -16,12 +17,6 @@ if (!x)\
 {\
 LOG_LAST_ERROR();\
 return -1;\
-}\
-
-#define CALL_ONCE(x)\
-{\
-static std::once_flag flag;\
-std::call_once(flag, x);\
 }\
 
 namespace impl
