@@ -47,10 +47,10 @@ namespace impl
 	__forceinline std::pair<void*, std::wstring> get_module_data( HANDLE process_handle, const std::wstring_view module_name )
 	{
 		auto loaded_modules = std::make_unique<HMODULE[ ]>( 64 );
-		auto loaded_module_sz = 0;
+		DWORD loaded_module_sz = 0;
 
 		// enumerate all modules by handle, using size of 512 since the required size is in bytes, and an HMODULE is 8 bytes large.
-		if ( !EnumProcessModules( process_handle, loaded_modules.get( ), 512, reinterpret_cast< PDWORD >( &loaded_module_sz ) ) )
+		if ( !EnumProcessModules( process_handle, loaded_modules.get( ), 512, &loaded_module_sz ) )
 		{
 			LOG_LAST_ERROR( );
 			return {};

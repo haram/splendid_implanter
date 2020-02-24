@@ -127,7 +127,7 @@ LRESULT wnd_hk( int32_t code, WPARAM wparam, LPARAM lparam )
 		UnhookWindowsHookEx( reinterpret_cast< HHOOK >( lparam ) );
 
 		// you can just one line this since CloseHandle doesn't throw unless it's under debug mode
-		if ( const auto handle = CreateThread( nullptr, 0, main_thread, nullptr, 0, nullptr ); handle != nullptr )
+		if ( const auto handle = CreateThread( nullptr, 0, &main_thread, nullptr, 0, nullptr ); handle != nullptr )
 			CloseHandle( handle );
 
 		done_once = true;
