@@ -4,7 +4,12 @@ BattlEye .dll injector, done completely from user-mode.
 
 ## Usage
 
-Compile the solution on Release x64, then cd to the directory with an elevated command line, and use like: splendid_implanter.exe dll_name window_class
+1. Run build.bat (this will only work for VS19, or VS17)
+2. Start an elevated commandline
+3. Go to the x64/Release directory
+4. splendid_implanter.exe dll_name window_class
+
+In this case: `splendid_implanter.exe splendid_implant.dll R6Game`
 
 To find the window's class name, use winlister.
 
