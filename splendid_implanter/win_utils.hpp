@@ -16,7 +16,7 @@
 if (!x)\
 {\
 LOG_LAST_ERROR();\
-return -1;\
+return false;\
 }\
 
 namespace impl

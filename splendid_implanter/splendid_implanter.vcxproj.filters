@@ -12,6 +12,12 @@
     <ClInclude Include="win_utils.hpp">
       <Filter>header files</Filter>
     </ClInclude>
+    <ClInclude Include="be_bypass.hpp">
+      <Filter>header files</Filter>
+    </ClInclude>
+    <ClInclude Include="misc_utils.hpp">
+      <Filter>header files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">

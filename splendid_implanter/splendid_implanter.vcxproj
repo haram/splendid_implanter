@@ -145,6 +145,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="be_bypass.hpp" />
+    <ClInclude Include="misc_utils.hpp" />
     <ClInclude Include="win_utils.hpp" />
   </ItemGroup>
   <ItemGroup>
