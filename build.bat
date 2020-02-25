@@ -1,8 +1,7 @@
 @echo off
 
-SET "VS_LOC="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\devenv.exe""
+for /f "usebackq tokens=*" %%i in (`vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do (
+  set InstallDir=%%i
+)
 
-IF EXIST "%VS_LOC%" (goto compile) else (SET "VS_LOC="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\devenv.exe"" goto compile)
-
-:compile
-%VS_LOC% /build release splendid_implanter.sln
+"%InstallDir%\Common7\IDE\devenv.exe" /build release splendid_implanter.sln
