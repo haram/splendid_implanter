@@ -1,6 +1,5 @@
 #include <chrono>
 #include <thread>
-
 #include "be_bypass.hpp"
 
 #pragma comment(lib, "LDE64x64.lib")
