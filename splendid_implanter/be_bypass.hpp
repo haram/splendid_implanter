@@ -27,12 +27,7 @@ namespace be_bypass
 
 		printf( "[~] waiting for BEService...\n" );
 
-		auto be_process_id = 0;
-
-		impl::wait_on_object( &be_process_id, [ ]( )
-							  {
-								  return impl::get_process_id( L"BEService.exe" );
-							  } );
+		const auto be_process_id = impl::wait_on_object( [ ]( ) { return impl::get_process_id( L"BEService.exe" ); } );
 
 		if ( !be_process_id )
 		{
@@ -94,10 +89,7 @@ namespace be_bypass
 		const auto section_header_end = section_header + nt_header->FileHeader.NumberOfSections;
 
 		// get section that has IMAGE_SCN_MEM_EXECUTE flag, and no raw data.
-		auto executable_section = std::find_if( section_header, section_header_end, [ ]( const auto& section )
-												{
-													return section.SizeOfRawData != 0 && ( section.Characteristics & IMAGE_SCN_MEM_EXECUTE ) == IMAGE_SCN_MEM_EXECUTE;
-												} );
+		auto executable_section = std::find_if( section_header, section_header_end, [ ]( const auto& section ) { return section.SizeOfRawData != 0 && ( section.Characteristics & IMAGE_SCN_MEM_EXECUTE ) == IMAGE_SCN_MEM_EXECUTE; } );
 
 		if ( executable_section == section_header_end )
 		{
@@ -252,11 +244,7 @@ namespace be_bypass
 
 		printf( "[~] waiting for game to open...\n" );
 
-		HWND game_window = nullptr;
-		impl::wait_on_object( &game_window, [ window_class_name ]( )
-							  {
-								  return FindWindowW( window_class_name, nullptr );
-							  } );
+		const auto game_window = impl::wait_on_object( [ window_class_name ]( ) { return FindWindowW( window_class_name, nullptr ); } );
 
 		if ( !game_window )
 		{

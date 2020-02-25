@@ -4,25 +4,21 @@
 
 namespace impl
 {
-	template <typename T, class Fn>
-	void wait_on_object( T* out_var, Fn function )
+	using clock = std::chrono::steady_clock;
+
+	template <class Fn>
+	auto wait_on_object( Fn function, clock::duration interval = std::chrono::milliseconds( 250 ), clock::duration time_out = std::chrono::minutes( 2 ) ) -> decltype( function( ) )
 	{
-		if ( !out_var )
-			throw std::exception( "out_var was nullptr in wait_on_object" );
+		const auto start_time = clock::now( );
 
-		*out_var = T( );
-
-		const auto cached_time = std::chrono::system_clock::now( );
-
-		while ( !*out_var )
+		while ( clock::now( ) - start_time < time_out )
 		{
-			const auto current_time_mins = std::chrono::duration_cast< std::chrono::minutes >( std::chrono::system_clock::now( ) - cached_time ).count( );
+			if ( const auto result = function( ); result )
+				return result;
 
-			if ( current_time_mins >= 2u )
-				break;
-
-			*out_var = function( );
-			std::this_thread::sleep_for( std::chrono::milliseconds( 250 ) );
+			std::this_thread::sleep_for( interval );
 		}
+
+		return {};
 	}
 }
