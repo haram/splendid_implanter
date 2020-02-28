@@ -107,11 +107,9 @@ bool DllMain( HMODULE module_instance, DWORD call_reason, void* )
 	if ( call_reason != DLL_PROCESS_ATTACH )
 		return false;
 
-	//wchar_t file_name[ MAX_PATH ] = L"";
-	//GetModuleFileNameW( module_instance, file_name, _countof( file_name ) );
-	//LoadLibraryW( file_name );
-
-	MessageBoxA( nullptr, "hello world", "secret.club", MB_OK );
+	wchar_t file_name[ MAX_PATH ] = L"";
+	GetModuleFileNameW( module_instance, file_name, _countof( file_name ) );
+	LoadLibraryW( file_name );
 
 	return true;
 }
@@ -129,8 +127,8 @@ LRESULT wnd_hk( int32_t code, WPARAM wparam, LPARAM lparam )
 		UnhookWindowsHookEx( reinterpret_cast< HHOOK >( lparam ) );
 
 		// you can just one line this since CloseHandle doesn't throw unless it's under debug mode
-		//if ( const auto handle = CreateThread( nullptr, 0, &main_thread, nullptr, 0, nullptr ); handle != nullptr )
-		//	CloseHandle( handle );
+		if ( const auto handle = CreateThread( nullptr, 0, &main_thread, nullptr, 0, nullptr ); handle != nullptr )
+			CloseHandle( handle );
 
 		done_once = true;
 	}
