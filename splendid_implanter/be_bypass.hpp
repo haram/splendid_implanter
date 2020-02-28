@@ -138,12 +138,14 @@ namespace be_bypass
 
 		RET_CHK( WriteProcessMemory( detail::process_handle.get( ), paths_buffer, dll_path.get( ), dll_path_sz, nullptr ) )
 
+		detail::our_dll_buffer = reinterpret_cast< uint8_t* >( paths_buffer );
 		printf( "[~] wrote dll path successfully!\n" );
 
 		const auto second_path_buffer = reinterpret_cast< uint8_t* >( paths_buffer ) + dll_path_sz + 2;
 
 		RET_CHK( WriteProcessMemory( detail::process_handle.get( ), second_path_buffer, kernel_path.get( ), kernel_path_sz, nullptr ) )
 
+		detail::kernel32_dll_buffer = second_path_buffer;
 		printf( "[~] wrote kernel32 path successfully!\n" );
 
 		printf( "[~] leaving %s\n", __FUNCTION__ );
