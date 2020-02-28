@@ -14,7 +14,7 @@ namespace be_bypass
 		inline void* image_base = nullptr;
 		inline std::wstring image_path = {};
 
-		inline PIMAGE_SECTION_HEADER target_section = nullptr;
+		inline std::pair<uint32_t, uint32_t> target_section = { 0, 0 };
 		inline std::vector<uint8_t> stub_data = {};
 
 		inline uint8_t* our_dll_buffer = nullptr;
@@ -97,9 +97,11 @@ namespace be_bypass
 			return false;
 		}
 
-		detail::target_section = executable_section;
+		const auto target_section = executable_section;
 
-		printf( "[~] found target section [%s]\n", reinterpret_cast< const char* >( detail::target_section->Name + 1 ) );
+		printf( "[~] found target section [%s]\n", reinterpret_cast< const char* >( target_section->Name + 1 ) );
+
+		detail::target_section = { target_section->VirtualAddress, target_section->Misc.VirtualSize };
 
 		printf( "[~] leaving %s\n", __FUNCTION__ );
 
@@ -219,7 +221,7 @@ namespace be_bypass
 
 		printf( "[~] stub prepared\n" );
 
-		const auto deployment_location = ( reinterpret_cast< uint8_t* >( detail::image_base ) + detail::target_section->VirtualAddress + detail::target_section->Misc.VirtualSize ) - buf_len;
+		const auto deployment_location = ( reinterpret_cast< uint8_t* >( detail::image_base ) + detail::target_section.first + detail::target_section.second ) - buf_len;
 
 		printf( "[~] deploying stub...\n" );
 
