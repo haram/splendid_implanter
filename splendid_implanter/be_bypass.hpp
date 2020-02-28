@@ -21,8 +21,7 @@ namespace be_bypass
 		inline uint8_t* kernel32_dll_buffer = nullptr;
 	}
 
-	bool initializeo
-	( )
+	bool initialize( )
 	{
 		printf( "[~] entering %s\n", __FUNCTION__ );
 
