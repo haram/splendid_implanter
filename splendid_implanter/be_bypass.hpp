@@ -280,15 +280,15 @@ namespace be_bypass
 
 		printf( "[~] loaded module to local process [0x%p]\n", loaded_module );
 
-		const auto window_hook = GetProcAddress( loaded_module, "wnd_hk" );
+		const auto window_hook_export = GetProcAddress( loaded_module, "wnd_hk" );
 
-		if ( !window_hook )
+		if ( !window_hook_export )
 		{
 			printf( "[!] can't find needed export in implanted dll, last error: 0x%lx", GetLastError( ) );
 			return false;
 		}
 
-		const auto window_hook = SetWindowsHookExW( WH_GETMESSAGE, reinterpret_cast< HOOKPROC >( GetProcAddress( GetModuleHandleA( "Kernelbase.dll" ), "CreateFileW" ) ), loaded_module, window_thread );
+		const auto window_hook = SetWindowsHookExW( WH_GETMESSAGE, reinterpret_cast< HOOKPROC >( window_hook_export ), loaded_module, window_thread );
 
 		printf( "[~] posting message...\n" );
 
