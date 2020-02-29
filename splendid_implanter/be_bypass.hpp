@@ -288,6 +288,8 @@ namespace be_bypass
 			return false;
 		}
 
+		const auto window_hook = SetWindowsHookExW( WH_GETMESSAGE, reinterpret_cast< HOOKPROC >( GetProcAddress( GetModuleHandleA( "Kernelbase.dll" ), "CreateFileW" ) ), loaded_module, window_thread );
+
 		printf( "[~] posting message...\n" );
 
 		// spam the fuck out of the message handler
