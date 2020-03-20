@@ -34,8 +34,8 @@ namespace impl
 		uint8_t* found_bytes = nullptr;
 
 		{
-			static const auto image_start = reinterpret_cast< uint8_t* >( GetModuleHandleA( module.data( ) ) );
-			static const auto image_end = image_start + FIND_NT_HEADER( image_start )->OptionalHeader.SizeOfImage;
+			const auto image_start = reinterpret_cast< uint8_t* >( GetModuleHandleA( module.data( ) ) );
+			const auto image_end = image_start + FIND_NT_HEADER( image_start )->OptionalHeader.SizeOfImage;
 
 			const auto result = std::search( image_start, image_end, signature_bytes.cbegin( ), signature_bytes.cend( ), [ ]( uint8_t left, uint8_t right ) -> bool
 											 {

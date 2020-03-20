@@ -6,14 +6,13 @@
 
 bool is_in_game( game_state_t* state_manager )
 {
-	const auto game_state = state_manager->game_state;
-
-	// == prep phase, == action phase
-	return game_state == PREP_PHASE || game_state == ACTION_PHASE;
+	return state_manager->game_state == PREP_PHASE || state_manager->game_state == ACTION_PHASE;
 }
 
 unsigned long main_thread( void* )
 {
+	std::this_thread::sleep_for( std::chrono::seconds( 20 ) );
+
 	// xref: PlayerMarkerComponent
 	const auto player_marker_xref_sig = impl::find_signature( "RainbowSix.exe", "4c 89 0b 48 8d 15" ) + 3;
 
@@ -85,14 +84,16 @@ unsigned long main_thread( void* )
 			if ( !components.contents )
 				continue;
 
-			for ( auto j = 0u; j < components.size; j++ )
+			// iterate from 0x80 till end
+			for ( auto j = 16u; j < components.size; j++ )
 			{
 				const auto component = reinterpret_cast< uint8_t* >( components.contents[ j ] );
 
 				if ( !component || *reinterpret_cast< uint8_t** >( component ) != player_marker_component )
 					continue;
 
-				*reinterpret_cast< bool* >( component + 0x534 ) = esp_enabled;
+				*reinterpret_cast< bool* >( component + 0x552 ) = esp_enabled;
+				*reinterpret_cast< bool* >( component + 0x554 ) = esp_enabled;
 			}
 		}
 

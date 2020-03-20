@@ -29,7 +29,7 @@ struct entity_t
 
 struct game_manager_t
 {
-	char pad_0[ 0x1c8 ];
+	char pad_0[ 0xc8 ];
 	list_t<entity_t> entity_list;
 };
 
