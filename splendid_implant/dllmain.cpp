@@ -74,20 +74,20 @@ unsigned long main_thread( void* )
 			if ( higher_bits == BOT_NORMAL || higher_bits == BOT_NORMAL2 )
 				continue;
 
-			const auto event_listener = entity->event_listener;
+			const auto event_listener = *reinterpret_cast< uint8_t** >( entity + 0x28 );
 
 			if ( !event_listener )
 				continue;
 
-			const auto components = event_listener->components;
+			const auto components_list = *reinterpret_cast< uint8_t** >( event_listener + 0xd8 );
 
-			if ( !components.contents )
+			if ( !components_list )
 				continue;
 
-			// iterate from 0x80 till end
-			for ( auto j = 16u; j < components.size; j++ )
+			// iterate from 0x80 till 0xb0
+			for ( auto j = 16ull; j < 22ull; j++ )
 			{
-				const auto component = reinterpret_cast< uint8_t* >( components.contents[ j ] );
+				const auto component = *reinterpret_cast< uint8_t** >( components_list + ( i * 8ull ) );
 
 				if ( !component || *reinterpret_cast< uint8_t** >( component ) != player_marker_component )
 					continue;
