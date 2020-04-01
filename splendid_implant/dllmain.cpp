@@ -22,7 +22,7 @@ unsigned long main_thread( void* )
 		return 0;
 	}
 
-	player_marker_xref_sig -= 21;
+	player_marker_xref_sig -= 18;
 	const auto player_marker_component = player_marker_xref_sig + *reinterpret_cast< int32_t* >( player_marker_xref_sig + 3 ) + 7;
 
 	// xref: R6TrackingManager or attackingTeamIndex (first mov rax above)
