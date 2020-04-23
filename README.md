@@ -2,6 +2,8 @@
 
 BattlEye compatible injector, done completely from user-mode.
 
+There is a more detailed write-up at: https://secret.club/2020/02/26/be_umode.html
+
 ## Usage
 
 1. Run build.bat (this will only work for VS19, or VS17)
